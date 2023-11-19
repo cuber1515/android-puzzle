@@ -6,6 +6,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.DragEvent;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,18 +38,40 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setTitle("Puzzle Game");
 
+        GridLayout gridLayout = findViewById(R.id.gridLayout);
+
         for (int i = 0; i <= 3; i++) {
             for (int j = 0; j <= 2; j++) {
-                int layoutId = getResources().getIdentifier("layout" + i + j, "id", getPackageName());
-                linearLayouts.add(findViewById(layoutId));
+                LinearLayout linearLayout = new LinearLayout(this);
+                linearLayouts.add(linearLayout);
 
-                int imageId = getResources().getIdentifier("image" + i + j, "id", getPackageName());
-                imageResourceIds.add(imageId);
+                linearLayout.setOnDragListener(new MyDragListener());
 
-                ImageView imageView = findViewById(imageId);
-                if (imageView != null) imageView.setOnTouchListener(new MyTouchListener());
+                GridLayout.LayoutParams params = new GridLayout.LayoutParams(GridLayout.spec(
+                        GridLayout.UNDEFINED, GridLayout.FILL, 1f),
+                        GridLayout.spec(GridLayout.UNDEFINED, GridLayout.FILL, 1f));
+                params.setMargins(3, 3, 3, 3);
+                linearLayout.setLayoutParams(params);
+                linearLayout.setGravity(Gravity.START | Gravity.END | Gravity.CENTER | Gravity.FILL);
 
-                findViewById(layoutId).setOnDragListener(new MyDragListener());
+                ImageView imageView = new ImageView(this);
+                imageView.setId(View.generateViewId());
+                imageResourceIds.add(imageView.getId());
+
+                imageView.setOnTouchListener(new MyTouchListener());
+
+                LinearLayout.LayoutParams params2 = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.MATCH_PARENT
+                );
+                params2.gravity = Gravity.START | Gravity.END | Gravity.CENTER;
+                imageView.setLayoutParams(params2);
+                imageView.setPadding(3, 3, 3, 3);
+                imageView.setImageResource(getResources().getIdentifier(
+                        "android" + i + j, "drawable", getPackageName()));
+                imageView.setAdjustViewBounds(true);
+                linearLayout.addView(imageView);
+                gridLayout.addView(linearLayout);
             }
         }
 
@@ -184,6 +207,7 @@ public class MainActivity extends AppCompatActivity {
             GridLayout.LayoutParams params = new GridLayout.LayoutParams();
             params.height = GridLayout.LayoutParams.MATCH_PARENT;
             params.width = GridLayout.LayoutParams.MATCH_PARENT;
+            params.setGravity(Gravity.CENTER | Gravity.FILL);
             completedImageView.setLayoutParams(params);
 
             Toast.makeText(MainActivity.this, "🎉 Congratulations! You solved the puzzle! 🧩", Toast.LENGTH_LONG).show();
